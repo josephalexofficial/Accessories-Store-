@@ -1,0 +1,79 @@
+import Link from "next/link";
+import { auth, signOut } from "@/auth";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  MessageCircle,
+  Users,
+  Shield,
+  LogOut,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const NAV = [
+  { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/whatsapp", label: "WhatsApp Log", icon: MessageCircle },
+  { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/admins", label: "Admins", icon: Shield },
+];
+
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await auth();
+
+  if (!session) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-surface">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-brand md:flex">
+        <div className="border-b border-white/20 p-6">
+          <p className="text-sm font-bold tracking-widest text-white">WHIMSEY</p>
+          <p className="text-xs text-white/70">Admin Panel</p>
+        </div>
+        <nav className="flex-1 space-y-1 p-4">
+          {NAV.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 transition-all duration-200 hover:bg-white/15 hover:text-white"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/admin" });
+          }}
+          className="border-t border-white/20 p-4"
+        >
+          <button
+            type="submit"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
+        </form>
+      </aside>
+      <main className="flex-1 bg-white md:ml-64">
+        <div className="border-b border-border bg-brand p-4 md:hidden">
+          <p className="text-sm font-bold tracking-widest text-white">WHIMSEY ADMIN</p>
+        </div>
+        <div className="p-4 md:p-8">{children}</div>
+      </main>
+    </div>
+  );
+}
