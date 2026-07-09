@@ -1,0 +1,119 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Database Model 1: Admin Team Management Accounts
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id             String      @id @default(uuid())
+  title          String
+  brand          String
+  slug           String      @unique
+  category       String
+  price          Decimal     @db.Decimal(12, 2)
+  salePrice      Decimal?    @db.Decimal(12, 2)
+  isSale         Boolean     @default(false)
+  stockStatus    StockStatus @default(IN_STOCK)
+  imageUrl       String?
+  specType       SpecType    @default(KEY_VALUE)
+  specifications Json        @default("[]")
+  viewCount      Int         @default(0)
+  popularity     Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+  whatsappClicks WhatsAppClick[]
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  SOLD_OUT
+}
+
+enum SpecType {
+  KEY_VALUE
+  BULLET_LIST
+}
+
+model Customer {
+  id                   String          @id @default(uuid())
+  firstName            String
+  lastName             String
+  email                String          @unique
+  phone                String
+  preferredFulfillment FulfillmentType @default(DELIVERY)
+  deliveryTown         String?
+  createdAt            DateTime        @default(now())
+  orders               Order[]
+}
+
+model Order {
+  id              String          @id @default(uuid())
+  orderNumber     String          @unique
+  customerId      String?
+  customer        Customer?       @relation(fields: [customerId], references: [id])
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  fulfillmentType FulfillmentType
+  deliveryTown    String?
+  subtotal        Decimal         @db.Decimal(12, 2)
+  shipping        Decimal         @default(0) @db.Decimal(12, 2)
+  total           Decimal         @db.Decimal(12, 2)
+  paymentStatus   PaymentStatus   @default(PENDING)
+  orderStatus     OrderStatus     @default(PENDING)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  items           OrderItem[]
+}
+
+enum FulfillmentType {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  COMPLETED
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(12, 2)
+  title     String
+}
+
+model WhatsAppClick {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  page      String?
+  createdAt DateTime @default(now())
+}
