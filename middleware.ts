@@ -1,5 +1,8 @@
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
+import { authConfig } from "@/auth.config";
+
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
@@ -7,7 +10,7 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
 
   if (isAdminRoute && !isLoginPage && !isLoggedIn) {
-    return NextResponse.rewrite(new URL("/not-found", req.url));
+    return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   if (isLoginPage && isLoggedIn) {
@@ -18,5 +21,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*"],
 };

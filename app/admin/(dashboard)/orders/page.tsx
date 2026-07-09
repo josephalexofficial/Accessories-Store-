@@ -1,11 +1,32 @@
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import {
+  AdminEmptyState,
+  AdminPageHeader,
+  AdminPanel,
+  AdminTable,
+  AdminTableBody,
+  AdminTableCell,
+  AdminTableHead,
+  AdminTableHeaderCell,
+  AdminTableRow,
+} from "@/components/admin/admin-ui";
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: { items: true },
+    select: {
+      id: true,
+      orderNumber: true,
+      createdAt: true,
+      firstName: true,
+      lastName: true,
+      fulfillmentType: true,
+      total: true,
+      paymentStatus: true,
+      orderStatus: true,
+    },
   });
 
   const statusVariant = (status: string) => {
@@ -22,58 +43,66 @@ export default async function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Orders & Fulfillment</h1>
+      <AdminPageHeader title="Orders & Fulfillment" />
 
-      <div className="overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
-          <thead className="border-b border-border bg-card">
-            <tr className="text-left text-xs uppercase tracking-wide text-muted">
-              <th className="p-4">Order ID</th>
-              <th className="p-4">Date</th>
-              <th className="p-4">Customer</th>
-              <th className="p-4">Fulfillment</th>
-              <th className="p-4">Total</th>
-              <th className="p-4">Payment</th>
-              <th className="p-4">Status</th>
-            </tr>
-          </thead>
-          <tbody>
+      <AdminPanel>
+        <AdminTable>
+          <AdminTableHead>
+            <AdminTableHeaderCell>Order ID</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Date</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Customer</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Fulfillment</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Total</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Payment</AdminTableHeaderCell>
+            <AdminTableHeaderCell>Status</AdminTableHeaderCell>
+          </AdminTableHead>
+          <AdminTableBody>
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-muted">
-                  No orders yet.
+                <td colSpan={7}>
+                  <AdminEmptyState>No orders yet.</AdminEmptyState>
                 </td>
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order.id} className="border-b border-border last:border-0">
-                  <td className="p-4 font-mono text-xs">{order.orderNumber}</td>
-                  <td className="p-4 text-muted">
+                <AdminTableRow key={order.id}>
+                  <AdminTableCell className="font-mono text-xs">
+                    {order.orderNumber}
+                  </AdminTableCell>
+                  <AdminTableCell className="text-muted">
                     {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4">{order.firstName} {order.lastName}</td>
-                  <td className="p-4">
+                  </AdminTableCell>
+                  <AdminTableCell>
+                    {order.firstName} {order.lastName}
+                  </AdminTableCell>
+                  <AdminTableCell>
                     <Badge variant="muted">
-                      {order.fulfillmentType === "DELIVERY" ? "Fargo Delivery" : "Store Pickup"}
+                      {order.fulfillmentType === "DELIVERY"
+                        ? "Fargo Delivery"
+                        : "Store Pickup"}
                     </Badge>
-                  </td>
-                  <td className="p-4 font-medium">{formatPrice(Number(order.total))}</td>
-                  <td className="p-4">
-                    <Badge variant={order.paymentStatus === "PAID" ? "success" : "muted"}>
+                  </AdminTableCell>
+                  <AdminTableCell className="font-medium">
+                    {formatPrice(Number(order.total))}
+                  </AdminTableCell>
+                  <AdminTableCell>
+                    <Badge
+                      variant={order.paymentStatus === "PAID" ? "success" : "muted"}
+                    >
                       {order.paymentStatus}
                     </Badge>
-                  </td>
-                  <td className="p-4">
+                  </AdminTableCell>
+                  <AdminTableCell>
                     <Badge variant={statusVariant(order.orderStatus)}>
                       {order.orderStatus}
                     </Badge>
-                  </td>
-                </tr>
+                  </AdminTableCell>
+                </AdminTableRow>
               ))
             )}
-          </tbody>
-        </table>
-      </div>
+          </AdminTableBody>
+        </AdminTable>
+      </AdminPanel>
     </div>
   );
 }

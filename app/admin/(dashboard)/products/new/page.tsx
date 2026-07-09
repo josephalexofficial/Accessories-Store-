@@ -6,6 +6,7 @@ import { CATEGORIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AdminPageHeader, AdminPanel } from "@/components/admin/admin-ui";
 import { Plus, Trash2 } from "lucide-react";
 
 type SpecRow = { key: string; value: string };
@@ -55,10 +56,12 @@ export default function NewProductPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Add New Product</h1>
+    <div className="space-y-6">
+      <AdminPageHeader title="Add New Product" />
 
-      <form onSubmit={handleSubmit} className="space-y-5 rounded-xl border border-border bg-card p-6">
+      <div className="mx-auto w-full max-w-2xl">
+        <AdminPanel className="p-4 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-xs uppercase text-muted">Product Title</label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -155,6 +158,8 @@ export default function NewProductPage() {
           {loading ? "Saving..." : "Create Product"}
         </Button>
       </form>
+        </AdminPanel>
+      </div>
     </div>
   );
 }

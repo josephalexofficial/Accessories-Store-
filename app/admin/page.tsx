@@ -38,7 +38,6 @@ export default function AdminLoginPage() {
     }
 
     router.push("/admin/dashboard");
-    router.refresh();
   }
 
   return (

@@ -39,6 +39,12 @@ export const CATEGORIES = [
   "Storage",
 ] as const;
 
+/** Store categories shown in shop navigation and homepage showcases */
+export const SHOP_CATEGORIES = CATEGORIES.filter(
+  (category): category is Exclude<(typeof CATEGORIES)[number], "All Products"> =>
+    category !== "All Products"
+);
+
 export const SOCIAL_LINKS = [
   {
     name: "X",

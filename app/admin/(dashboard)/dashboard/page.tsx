@@ -8,25 +8,30 @@ import {
   MessageCircle,
   Package,
 } from "lucide-react";
+import { AdminPageHeader, AdminPanel } from "@/components/admin/admin-ui";
 
 export default async function AdminDashboardPage() {
-  const [orders, products, whatsappClicks] = await Promise.all([
-    prisma.order.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { items: true },
-    }),
-    prisma.product.count(),
-    prisma.whatsAppClick.count(),
-  ]);
+  const [recentOrders, productCount, whatsappClicks, paidRevenue, totalOrders] =
+    await Promise.all([
+      prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          orderNumber: true,
+          total: true,
+          paymentStatus: true,
+        },
+      }),
+      prisma.product.count(),
+      prisma.whatsAppClick.count(),
+      prisma.order.aggregate({
+        where: { paymentStatus: "PAID" },
+        _sum: { total: true },
+      }),
+      prisma.order.count(),
+    ]);
 
-  const paidOrders = await prisma.order.findMany({
-    where: { paymentStatus: "PAID" },
-    select: { total: true },
-  });
-
-  const totalRevenue = paidOrders.reduce((sum, o) => sum + Number(o.total), 0);
-  const totalOrders = await prisma.order.count();
+  const totalRevenue = Number(paidRevenue._sum.total ?? 0);
 
   const stats = [
     {
@@ -46,7 +51,7 @@ export default async function AdminDashboardPage() {
     },
     {
       label: "Active Products",
-      value: `${products} Items`,
+      value: `${productCount} Items`,
       icon: Package,
     },
   ];
@@ -65,49 +70,51 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-foreground">Dashboard Overview</h1>
+      <AdminPageHeader title="Dashboard Overview" />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="flex items-center justify-between p-6">
+          <Card key={stat.label} className="border-border/80 shadow-sm">
+            <CardContent className="flex items-center justify-between p-5">
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted">
                   {stat.label}
                 </p>
                 <p className="mt-2 text-xl font-bold text-brand">{stat.value}</p>
               </div>
-              <stat.icon className="h-8 w-8 text-brand opacity-80" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-tint">
+                <stat.icon className="h-5 w-5 text-brand" />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+        <Card className="border-border/80 shadow-sm lg:col-span-3">
           <CardHeader>
             <CardTitle>Sales Over Time</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted">
+            <div className="flex h-48 items-center justify-center rounded-lg border border-dashed border-border bg-surface text-sm text-muted">
               Sales chart — connect Paystack data to populate
             </div>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {orders.length === 0 ? (
+        <AdminPanel className="lg:col-span-2">
+          <div className="border-b border-border px-6 py-5">
+            <h2 className="text-lg font-semibold text-foreground">Recent Orders</h2>
+          </div>
+          <div className="p-6">
+            {recentOrders.length === 0 ? (
               <p className="text-sm text-muted">No orders yet.</p>
             ) : (
               <div className="space-y-3">
-                {orders.map((order) => (
+                {recentOrders.map((order) => (
                   <div
-                    key={order.id}
-                    className="flex items-center justify-between border-b border-border pb-3 last:border-0"
+                    key={order.orderNumber}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-surface/60 px-3 py-3"
                   >
                     <span className="font-mono text-xs text-muted">
                       {order.orderNumber}
@@ -122,8 +129,8 @@ export default async function AdminDashboardPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </AdminPanel>
       </div>
     </div>
   );
