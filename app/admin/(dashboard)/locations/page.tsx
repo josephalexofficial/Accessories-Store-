@@ -1,4 +1,5 @@
 import { getAllDeliveryLocations } from "@/lib/delivery-locations";
+import type { AdminDeliveryLocation } from "@/lib/delivery-location-types";
 import { AddLocationForm } from "@/components/admin/add-location-form";
 import { LocationTableRow } from "@/components/admin/location-table-row";
 import {
@@ -12,7 +13,7 @@ import {
 } from "@/components/admin/admin-ui";
 
 export default async function AdminLocationsPage() {
-  const locations = await getAllDeliveryLocations();
+  const locations: AdminDeliveryLocation[] = await getAllDeliveryLocations();
 
   return (
     <div className="space-y-8">
@@ -38,7 +39,7 @@ export default async function AdminLocationsPage() {
                     </td>
                   </tr>
                 ) : (
-                  locations.map((location) => (
+                  locations.map((location: AdminDeliveryLocation) => (
                     <LocationTableRow key={location.id} location={location} />
                   ))
                 )}

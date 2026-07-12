@@ -8,6 +8,7 @@
     "start": "next start",
     "start:prod": "npm run build && npm run start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:seed:products": "npx tsx prisma/seed.ts",
     "db:migrate": "npx prisma migrate dev",

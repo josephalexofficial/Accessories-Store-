@@ -55,22 +55,18 @@ export async function findDeliveryLocationById(
 export async function getAllDeliveryLocations(): Promise<
   AdminDeliveryLocation[]
 > {
-  const locations = await prisma.deliveryLocation.findMany({
+  const rows = await prisma.deliveryLocation.findMany({
     orderBy: { name: "asc" },
   });
-  return locations.map(
-    (location: {
-      id: string;
-      name: string;
-      fee: { toString(): string } | number;
-      isActive: boolean;
-      createdAt: Date;
-      updatedAt: Date;
-    }): AdminDeliveryLocation => ({
-      ...serializeLocation(location),
-      isActive: location.isActive,
-      createdAt: location.createdAt,
-      updatedAt: location.updatedAt,
-    })
-  );
+
+  const locations: AdminDeliveryLocation[] = rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    fee: Number(row.fee),
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }));
+
+  return locations;
 }
