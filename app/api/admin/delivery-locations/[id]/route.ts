@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { notifySuperAdminOfStaffAction } from "@/lib/admin-notifications";
 
 function bustLocationCache() {
   revalidateTag("delivery-locations", "max");
@@ -54,6 +55,14 @@ export async function PUT(
 
     bustLocationCache();
 
+    await notifySuperAdminOfStaffAction({
+      type: "LOCATION_UPDATED",
+      title: "Delivery location updated",
+      message: `${location.name} was edited (Ksh ${Number(location.fee).toLocaleString()}).`,
+      href: "/admin/locations",
+      actorEmail: session.user?.email,
+    });
+
     return NextResponse.json({
       id: location.id,
       name: location.name,
@@ -77,8 +86,17 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    await prisma.deliveryLocation.delete({ where: { id } });
+    const location = await prisma.deliveryLocation.delete({ where: { id } });
     bustLocationCache();
+
+    await notifySuperAdminOfStaffAction({
+      type: "LOCATION_DELETED",
+      title: "Delivery location deleted",
+      message: `${location.name} was removed from delivery towns.`,
+      href: "/admin/locations",
+      actorEmail: session.user?.email,
+    });
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Location not found" }, { status: 404 });

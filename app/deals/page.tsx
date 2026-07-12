@@ -5,7 +5,8 @@ import { ShopSidebar } from "@/components/product/shop-sidebar";
 import { SortBar } from "@/components/product/sort-bar";
 import { MobileFiltersSort } from "@/components/product/mobile-filters-sort";
 import { ProductGrid } from "@/components/product/product-grid";
-import { getProducts } from "@/lib/products";
+import { ProductPagination } from "@/components/product/product-pagination";
+import { getProductsPage } from "@/lib/products";
 import { parseShopQuery } from "@/lib/shop-params";
 
 interface DealsPageProps {
@@ -15,6 +16,7 @@ interface DealsPageProps {
     q?: string;
     min?: string;
     max?: string;
+    page?: string;
   }>;
 }
 
@@ -22,16 +24,35 @@ export const revalidate = 120;
 
 export default async function DealsPage({ searchParams }: DealsPageProps) {
   const params = await searchParams;
-  const { category, sort, q, minPrice, maxPrice } = parseShopQuery(params);
+  const { category, sort, q, minPrice, maxPrice, page } = parseShopQuery(params);
 
-  const products = await getProducts({
-    category,
-    sort,
-    isSale: true,
-    q: q || undefined,
-    minPrice,
-    maxPrice,
-  });
+  const {
+    items: products,
+    total,
+    page: currentPage,
+    pageSize,
+    totalPages,
+  } = await getProductsPage(
+    {
+      category,
+      sort,
+      isSale: true,
+      q: q || undefined,
+      minPrice,
+      maxPrice,
+    },
+    page
+  );
+
+  const rangeStart = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const rangeEnd = Math.min(currentPage * pageSize, total);
+
+  const countLabel =
+    total === 0
+      ? "0 deals"
+      : totalPages > 1
+        ? `Showing ${rangeStart}–${rangeEnd} of ${total} deals`
+        : `${total} deal${total !== 1 ? "s" : ""}`;
 
   return (
     <StoreLayout>
@@ -61,7 +82,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
           <div className="flex-1 space-y-5 md:space-y-6">
             <div className="hidden items-center justify-between gap-4 md:flex">
               <p className="text-sm text-muted">
-                {products.length} deal{products.length !== 1 ? "s" : ""}
+                {countLabel}
                 {category !== "All Products" && (
                   <span>
                     {" "}
@@ -79,7 +100,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
                 <MobileFiltersSort />
               </Suspense>
               <p className="text-sm text-muted">
-                {products.length} deal{products.length !== 1 ? "s" : ""}
+                {countLabel}
                 {category !== "All Products" && (
                   <span>
                     {" "}
@@ -92,7 +113,12 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
             <ProductGrid
               products={products}
               emptyMessage="No deals available right now. Check back soon!"
+              priorityCount={currentPage === 1 ? 8 : 0}
             />
+
+            <Suspense fallback={null}>
+              <ProductPagination page={currentPage} totalPages={totalPages} />
+            </Suspense>
           </div>
         </div>
       </div>

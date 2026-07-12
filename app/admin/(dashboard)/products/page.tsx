@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 import { groupByCategory } from "@/lib/admin-products";
+import { getAdminProductList } from "@/lib/admin-queries";
 import { formatPrice } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import {
@@ -19,20 +19,7 @@ import {
 } from "@/components/admin/admin-ui";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({
-    orderBy: [{ category: "asc" }, { title: "asc" }],
-    select: {
-      id: true,
-      title: true,
-      brand: true,
-      category: true,
-      price: true,
-      salePrice: true,
-      isSale: true,
-      stockStatus: true,
-    },
-  });
-
+  const products = await getAdminProductList();
   const groupedProducts = groupByCategory(products);
 
   const stockVariant = (status: string) => {
@@ -47,13 +34,16 @@ export default async function AdminProductsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
       <AdminPageHeader title="Product & Inventory">
-        <Link href="/admin/products/new">
-          <Button>
-            <Plus className="h-4 w-4" />
-            Add New Product
-          </Button>
+        <Link
+          href="/admin/products/new"
+          className={buttonVariants({
+            className: "gap-2 whitespace-nowrap shadow-sm",
+          })}
+        >
+          <Plus className="h-4 w-4 shrink-0" />
+          Add New Product
         </Link>
       </AdminPageHeader>
 
@@ -62,9 +52,9 @@ export default async function AdminProductsPage() {
           <AdminEmptyState>No products yet. Add your first product.</AdminEmptyState>
         </AdminPanel>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-5 sm:space-y-8">
           {groupedProducts.map(({ category, items }) => (
-            <section key={category} className="space-y-3">
+            <section key={category} className="space-y-2.5 sm:space-y-3">
               <AdminSectionHeader title={category} count={items.length} />
 
               <AdminPanel>
@@ -79,8 +69,8 @@ export default async function AdminProductsPage() {
                   <AdminTableBody>
                     {items.map((product) => (
                       <AdminTableRow key={product.id}>
-                        <AdminTableCell className="font-medium text-foreground">
-                          {product.title}
+                        <AdminTableCell className="max-w-[11rem] font-medium text-foreground sm:max-w-none">
+                          <span className="line-clamp-2">{product.title}</span>
                         </AdminTableCell>
                         <AdminTableCell className="text-muted">
                           {product.brand}
@@ -103,10 +93,15 @@ export default async function AdminProductsPage() {
                           </Badge>
                         </AdminTableCell>
                         <AdminTableCell>
-                          <Link href={`/admin/products/${product.id}/edit`}>
-                            <Button variant="outline" size="sm">
-                              Edit
-                            </Button>
+                          <Link
+                            href={`/admin/products/${product.id}/edit`}
+                            prefetch
+                            className={buttonVariants({
+                              variant: "outline",
+                              size: "sm",
+                            })}
+                          >
+                            Edit
                           </Link>
                         </AdminTableCell>
                       </AdminTableRow>

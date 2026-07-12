@@ -8,6 +8,7 @@ interface CategoryShowcaseProps {
   products: Product[];
   seeMoreLabel?: string;
   title?: string;
+  priorityCount?: number;
 }
 
 export function CategoryShowcase({
@@ -15,6 +16,7 @@ export function CategoryShowcase({
   products,
   seeMoreLabel = "View all",
   title,
+  priorityCount = 0,
 }: CategoryShowcaseProps) {
   if (products.length === 0) return null;
 
@@ -32,7 +34,7 @@ export function CategoryShowcase({
           {seeMoreLabel === "View all" && <ArrowRight className="h-4 w-4" />}
         </Link>
       </div>
-      <ProductGrid products={products.slice(0, 5)} />
+      <ProductGrid products={products.slice(0, 5)} priorityCount={priorityCount} />
     </section>
   );
 }

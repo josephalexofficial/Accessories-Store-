@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function AddAdminForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -20,6 +22,7 @@ export function AddAdminForm() {
     }
 
     setLoading(true);
+    setMessage("");
     const res = await fetch("/api/admin/admins", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -32,6 +35,7 @@ export function AddAdminForm() {
       setEmail("");
       setPassword("");
       setConfirm("");
+      router.refresh();
     } else {
       const data = await res.json();
       setMessage(data.error ?? "Failed to create admin");
@@ -40,16 +44,34 @@ export function AddAdminForm() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Add New Admin</CardTitle>
+      <CardHeader className="space-y-1 p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">Add New Admin</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input placeholder="New Admin Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <Input placeholder="Temporary Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <Input placeholder="Confirm Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          <Input
+            placeholder="New Admin Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Temporary Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Confirm Password"
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+          />
           <Button type="submit" disabled={loading} className="w-full">
-            Create Admin Account
+            {loading ? "Creating…" : "Create Admin Account"}
           </Button>
           {message && <p className="text-sm text-muted">{message}</p>}
         </form>

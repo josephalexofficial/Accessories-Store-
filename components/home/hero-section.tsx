@@ -53,6 +53,7 @@ export function HeroSection() {
                 alt="Premium laptop, headphones and ergonomic workspace setup"
                 fill
                 priority
+                quality={75}
                 className="object-cover object-center"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />

@@ -13,9 +13,7 @@ interface ProductSpecsProps {
   className?: string;
 }
 
-function parseKeyValueSpecs(
-  specifications: unknown
-): KeyValueSpec[] {
+function parseKeyValueSpecs(specifications: unknown): KeyValueSpec[] {
   if (!specifications) return [];
 
   if (Array.isArray(specifications)) {
@@ -69,21 +67,21 @@ export function ProductSpecs({
 
     if (items.length === 0) {
       return (
-        <p className={cn("text-sm text-muted", className)}>
+        <p className={cn("text-sm text-ink-muted", className)}>
           No specifications available.
         </p>
       );
     }
 
     return (
-      <ul className={cn("space-y-2", className)}>
+      <ul className={cn("space-y-2.5", className)}>
         {items.map((item, index) => (
           <li
             key={`${item}-${index}`}
-            className="flex items-start gap-2 text-sm text-foreground"
+            className="flex items-start gap-2.5 text-sm text-ink"
           >
             <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
-            <span>{item}</span>
+            <span className="leading-snug">{item}</span>
           </li>
         ))}
       </ul>
@@ -94,21 +92,28 @@ export function ProductSpecs({
 
   if (entries.length === 0) {
     return (
-      <p className={cn("text-sm text-muted", className)}>
+      <p className={cn("text-sm text-ink-muted", className)}>
         No specifications available.
       </p>
     );
   }
 
   return (
-    <dl className={cn("divide-y divide-border rounded-lg border border-border", className)}>
-      {entries.map((entry) => (
+    <dl className={cn("overflow-hidden rounded-xl", className)}>
+      {entries.map((entry, index) => (
         <div
           key={entry.key}
-          className="grid grid-cols-2 gap-4 px-4 py-3 text-sm even:bg-white/[0.02] sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]"
+          className={cn(
+            "grid gap-0.5 px-0 py-3 text-sm sm:grid-cols-[minmax(7rem,0.9fr)_minmax(0,1.4fr)] sm:gap-4 sm:px-1",
+            index > 0 && "border-t border-border/80"
+          )}
         >
-          <dt className="font-medium text-muted">{entry.key}</dt>
-          <dd className="text-foreground">{entry.value}</dd>
+          <dt className="text-[12px] font-semibold uppercase tracking-wide text-ink-subtle sm:text-sm sm:normal-case sm:tracking-normal sm:font-medium">
+            {entry.key}
+          </dt>
+          <dd className="font-semibold text-ink sm:text-right md:text-left">
+            {entry.value}
+          </dd>
         </div>
       ))}
     </dl>

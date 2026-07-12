@@ -1,6 +1,6 @@
 import { Clock3, MapPin } from "lucide-react";
 import { StoreLayout } from "@/components/layout/store-layout";
-import { GmailIcon, WhatsAppIcon } from "@/components/shared/brand-icons";
+import { GmailIcon, WhatsAppBrandIcon } from "@/components/shared/brand-icons";
 import { SocialLinks } from "@/components/shared/social-links";
 import { BRAND, PICKUP_ADDRESS, PICKUP_HOURS } from "@/lib/constants";
 import { buildGeneralInquiryMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
@@ -87,8 +87,8 @@ export default function ContactPage() {
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 md:mt-10 md:gap-5">
           <ContactTile
-            icon={<WhatsAppIcon className="h-6 w-6 md:h-7 md:w-7" />}
-            iconClassName="bg-[#25D366] text-white shadow-[0_4px_14px_rgba(37,211,102,0.35)]"
+            icon={<WhatsAppBrandIcon className="h-7 w-7 md:h-8 md:w-8" />}
+            iconClassName="bg-transparent p-0 shadow-none"
             label="WhatsApp"
             title="Chat With Us"
             description="Fastest way to ask about products, stock, and orders."

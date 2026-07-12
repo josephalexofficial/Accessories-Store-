@@ -1,36 +1,157 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Whimsey Accessories
 
-## Getting Started
+Premium tech accessories storefront for **Whimsey Technologies** — a full e-commerce experience with a customer shop, checkout, order tracking, and a production-ready admin panel.
 
-First, run the development server:
+Built for real retail ops in Kenya: delivery locations, WhatsApp handoff, inventory status, and clear order fulfillment states customers can track.
+
+---
+
+## Features
+
+### Storefront
+- Browse shop by category, search, sort, and price filters
+- Deals page for promotional items
+- Responsive product grids with pagination (24 products per page)
+- Product detail pages with specs, stock status, and WhatsApp inquiry
+- Cart + checkout (delivery or store pickup)
+- Order tracking by Order ID + email (Received → Preparing → On transit → Delivered)
+
+### Admin
+- Secure admin login (NextAuth)
+- Dashboard overview (orders, revenue, catalog, WhatsApp activity)
+- Product & inventory management (create / edit / stock / deals)
+- Orders & fulfillment (list, detail, status + payment updates, customer notes)
+- Delivery locations and fees
+- Customers, WhatsApp click log, and admin team management
+- In-app notifications for new orders and staff activity
+- Mobile-friendly admin shell with slide-out navigation
+
+---
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | React 19, Tailwind CSS v4, Lucide icons |
+| Database | PostgreSQL (Prisma ORM) |
+| Auth | NextAuth v5 |
+| State | Zustand (cart) |
+| Deploy target | Vercel-ready |
+
+---
+
+## Project structure (high level)
+
+```text
+app/
+  (storefront routes)     # /, /shop, /deals, /cart, /checkout, /track-order, …
+  admin/                  # Admin login + dashboard routes
+  api/                    # REST handlers (orders, products, track, admin, …)
+components/
+  admin/                  # Admin UI
+  product/                # Shop grids, filters, pagination
+  track-order/            # Order tracking form
+lib/                      # Prisma, products, orders, auth helpers
+prisma/                   # Schema + seed
+```
+
+---
+
+## Getting started
+
+### Prerequisites
+- Node.js 20+
+- A PostgreSQL database (local or hosted, e.g. Supabase)
+
+### 1. Install
+
+```bash
+npm install
+```
+
+### 2. Environment
+
+Create a `.env` file in the project root with at least:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB?schema=public"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DB?schema=public"
+
+AUTH_SECRET="generate-a-long-random-secret"
+# Auth / provider settings as configured in your auth.ts setup
+```
+
+> Use `DIRECT_URL` for Prisma migrations when your primary `DATABASE_URL` goes through a pooler.
+
+### 3. Database
+
+```bash
+npx prisma db push
+npm run db:seed
+```
+
+### 4. Develop
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Admin area: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server |
+| `npm run lint` | ESLint |
+| `npm run db:push` | Push Prisma schema to the database |
+| `npm run db:migrate` | Run Prisma migrations (dev) |
+| `npm run db:seed` | Seed products / baseline data |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Order status (customer-facing)
 
-## Deploy on Vercel
+Admin and Track Order share the same lifecycle:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| System status | Customer label |
+| --- | --- |
+| `PENDING` | Order received |
+| `PROCESSING` | Preparing |
+| `SHIPPED` | On transit |
+| `COMPLETED` | Delivered |
+| `CANCELLED` | Cancelled |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Payment is tracked separately (`PENDING` / `PAID` / `FAILED`).
+
+---
+
+## Deployment notes
+
+1. Set the same environment variables in your host (e.g. Vercel).
+2. Run `prisma generate` on install (`postinstall` is already configured).
+3. Apply schema with `prisma db push` or migrations against production.
+4. Deploy the Next.js app; no separate frontend server is required.
+
+---
+
+## Brand
+
+**Whimsey Technologies** — premium hardware ecosystems engineered for elite digital setups.
+
+- Email: whimseytech@gmail.com  
+- WhatsApp: 0769591223  
+
+---
+
+## License
+
+Private project for Whimsey Technologies. All rights reserved unless otherwise stated.

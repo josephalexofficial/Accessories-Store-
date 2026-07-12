@@ -49,5 +49,5 @@ export function buildOrderStatusMessage(
   orderId: string,
   status: string
 ): string {
-  return `Hello ${customerName}! This is Whimsey Technologies. Your order #${orderId} has been updated to ${status}. Thank you for shopping with us!`;
+  return `Hello ${customerName}! This is Whimsey Technologies. Your order #${orderId} is now: ${status}. Thank you for shopping with us!`;
 }

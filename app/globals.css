@@ -155,15 +155,24 @@ body {
 
 .admin-shell {
   background: #f8fafc;
-  --admin-mobile-chrome-height: 6.5rem;
+  /* Matches mobile top bar: py-2.5 + h-10 + border */
+  --admin-mobile-chrome-height: 3.8125rem;
+}
+
+.admin-mobile-chrome {
+  /* Solid opaque paint so scrolled table/content never shows through */
+  background-color: #f8fafc !important;
+  isolation: isolate;
 }
 
 .admin-page-header {
-  top: 0;
+  /* Fallback if utility top is overridden */
+  top: var(--admin-mobile-chrome-height);
+  background-color: #f8fafc;
 }
 
-@media (max-width: 767px) {
+@media (min-width: 768px) {
   .admin-page-header {
-    top: var(--admin-mobile-chrome-height);
+    top: 0;
   }
 }

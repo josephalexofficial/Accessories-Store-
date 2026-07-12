@@ -76,6 +76,8 @@ model Order {
   total           Decimal         @db.Decimal(12, 2)
   paymentStatus   PaymentStatus   @default(PENDING)
   orderStatus     OrderStatus     @default(PENDING)
+  statusNote      String?
+  statusUpdatedAt DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   items           OrderItem[]
@@ -97,6 +99,7 @@ enum OrderStatus {
   PROCESSING
   SHIPPED
   COMPLETED
+  CANCELLED
 }
 
 model OrderItem {
@@ -125,4 +128,47 @@ model DeliveryLocation {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum AdminNotificationAudience {
+  ALL_ADMINS
+  SUPER_ADMIN_ONLY
+}
+
+enum AdminNotificationType {
+  NEW_ORDER
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  PRODUCT_DELETED
+  LOCATION_CREATED
+  LOCATION_UPDATED
+  LOCATION_DELETED
+  ADMIN_CREATED
+  ADMIN_DELETED
+}
+
+model AdminNotification {
+  id         String                    @id @default(uuid())
+  type       AdminNotificationType
+  audience   AdminNotificationAudience @default(ALL_ADMINS)
+  title      String
+  message    String
+  href       String?
+  actorEmail String?
+  createdAt  DateTime                  @default(now())
+  reads      AdminNotificationRead[]
+
+  @@index([createdAt])
+  @@index([audience, createdAt])
+}
+
+model AdminNotificationRead {
+  id             String            @id @default(uuid())
+  notificationId String
+  notification   AdminNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  adminEmail     String
+  readAt         DateTime          @default(now())
+
+  @@unique([notificationId, adminEmail])
+  @@index([adminEmail])
 }

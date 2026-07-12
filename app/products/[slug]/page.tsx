@@ -49,8 +49,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <StoreLayout>
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
-        <ProductDetailView product={product} />
+      <div className="bg-gradient-to-b from-brand-tint/40 via-canvas to-canvas">
+        <div className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-10">
+          <ProductDetailView product={product} />
+        </div>
       </div>
     </StoreLayout>
   );

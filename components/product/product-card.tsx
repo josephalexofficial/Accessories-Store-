@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { WhatsAppIcon } from "@/components/shared/brand-icons";
+import { WhatsAppBrandIcon } from "@/components/shared/brand-icons";
+import { ProductImage } from "@/components/product/product-image";
 import { type Product, getEffectivePrice } from "@/lib/product-types";
+import { PRODUCT_CARD_SIZES } from "@/lib/product-image";
 import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/store/cart";
@@ -16,6 +18,8 @@ import {
 interface ProductCardProps {
   product: Product;
   className?: string;
+  /** Eager-load above-the-fold card images (LCP). */
+  priority?: boolean;
 }
 
 async function trackClick(productId: string) {
@@ -30,7 +34,12 @@ async function trackClick(productId: string) {
   }
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({
+  product,
+  className,
+  priority = false,
+}: ProductCardProps) {
+  const router = useRouter();
   const addItem = useCart((s) => s.addItem);
   const effectivePrice = getEffectivePrice(product);
   const soldOut = product.stockStatus === "SOLD_OUT";
@@ -48,7 +57,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       imageUrl: product.imageUrl,
       slug: product.slug,
     });
-    window.location.href = "/checkout";
+    router.push("/cart");
   }
 
   function handleWhatsApp(e: React.MouseEvent) {
@@ -84,13 +93,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
         tabIndex={-1}
       >
         {product.imageUrl ? (
-          <Image
+          <ProductImage
             src={product.imageUrl}
             alt={product.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 50vw, 20vw"
-            unoptimized
+            sizes={PRODUCT_CARD_SIZES}
+            quality={60}
+            priority={priority}
+            className="transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-ink-subtle">
@@ -140,10 +149,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <button
               type="button"
               onClick={handleWhatsApp}
-              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-sm transition-transform hover:scale-105 hover:brightness-110 sm:h-9 sm:w-9"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-105 sm:h-9 sm:w-9"
               aria-label={`Inquire on WhatsApp about ${product.title}`}
             >
-              <WhatsAppIcon className="h-4 w-4 text-white sm:h-[1.125rem] sm:w-[1.125rem]" />
+              <WhatsAppBrandIcon className="h-8 w-8 sm:h-9 sm:w-9" />
             </button>
           </div>
 

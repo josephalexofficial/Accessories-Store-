@@ -5,7 +5,8 @@ import { ShopSidebar } from "@/components/product/shop-sidebar";
 import { SortBar } from "@/components/product/sort-bar";
 import { MobileFiltersSort } from "@/components/product/mobile-filters-sort";
 import { ProductGrid } from "@/components/product/product-grid";
-import { getProducts } from "@/lib/products";
+import { ProductPagination } from "@/components/product/product-pagination";
+import { getProductsPage } from "@/lib/products";
 import { parseShopQuery } from "@/lib/shop-params";
 
 interface ShopPageProps {
@@ -15,6 +16,7 @@ interface ShopPageProps {
     q?: string;
     min?: string;
     max?: string;
+    page?: string;
   }>;
 }
 
@@ -22,19 +24,38 @@ export const revalidate = 120;
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams;
-  const { category, sort, q, minPrice, maxPrice } = parseShopQuery(params);
+  const { category, sort, q, minPrice, maxPrice, page } = parseShopQuery(params);
 
-  const products = await getProducts({
-    category,
-    sort,
-    q: q || undefined,
-    minPrice,
-    maxPrice,
-  });
+  const {
+    items: products,
+    total,
+    page: currentPage,
+    pageSize,
+    totalPages,
+  } = await getProductsPage(
+    {
+      category,
+      sort,
+      q: q || undefined,
+      minPrice,
+      maxPrice,
+    },
+    page
+  );
 
   const emptyMessage = q
     ? `No products found for “${q}”. Try a different search.`
     : "No products found.";
+
+  const rangeStart = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const rangeEnd = Math.min(currentPage * pageSize, total);
+
+  const countLabel =
+    total === 0
+      ? "0 products"
+      : totalPages > 1
+        ? `Showing ${rangeStart}–${rangeEnd} of ${total} products`
+        : `${total} product${total !== 1 ? "s" : ""}`;
 
   return (
     <StoreLayout>
@@ -53,7 +74,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           )}
         </div>
 
-        {/* Sticky category pills — mobile only */}
         <div className="sticky top-16 z-40 -mx-4 mb-4 border-b border-border bg-canvas/95 px-4 py-2.5 backdrop-blur-md md:hidden">
           <Suspense fallback={null}>
             <CategoryPills activeCategory={category} basePath="/shop" />
@@ -68,10 +88,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           </div>
 
           <div className="flex-1 space-y-5 md:space-y-6">
-            {/* Desktop: count + sort */}
             <div className="hidden items-center justify-between gap-4 md:flex">
               <p className="text-sm text-muted">
-                {products.length} product{products.length !== 1 ? "s" : ""}
+                {countLabel}
                 {category !== "All Products" && (
                   <span>
                     {" "}
@@ -92,13 +111,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </Suspense>
             </div>
 
-            {/* Mobile: compact filters dropdown + count */}
             <div className="space-y-3 md:hidden">
               <Suspense fallback={null}>
                 <MobileFiltersSort />
               </Suspense>
               <p className="text-sm text-muted">
-                {products.length} product{products.length !== 1 ? "s" : ""}
+                {countLabel}
                 {category !== "All Products" && (
                   <span>
                     {" "}
@@ -108,7 +126,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               </p>
             </div>
 
-            <ProductGrid products={products} emptyMessage={emptyMessage} />
+            <ProductGrid
+              products={products}
+              emptyMessage={emptyMessage}
+              priorityCount={currentPage === 1 ? 8 : 0}
+            />
+
+            <Suspense fallback={null}>
+              <ProductPagination page={currentPage} totalPages={totalPages} />
+            </Suspense>
           </div>
         </div>
       </div>

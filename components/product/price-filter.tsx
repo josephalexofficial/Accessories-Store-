@@ -33,6 +33,8 @@ export function PriceFilter({ className }: PriceFilterProps) {
     if (maxValue) params.set("max", maxValue);
     else params.delete("max");
 
+    params.delete("page");
+
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
   }
@@ -43,6 +45,7 @@ export function PriceFilter({ className }: PriceFilterProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("min");
     params.delete("max");
+    params.delete("page");
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
   }

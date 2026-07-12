@@ -6,12 +6,15 @@ interface ProductGridProps {
   products: Product[];
   className?: string;
   emptyMessage?: string;
+  /** How many leading cards should eager-load images (above the fold). */
+  priorityCount?: number;
 }
 
 export function ProductGrid({
   products,
   className,
   emptyMessage = "No products found.",
+  priorityCount = 0,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -28,8 +31,12 @@ export function ProductGrid({
         className
       )}
     >
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+      {products.map((product, index) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          priority={index < priorityCount}
+        />
       ))}
     </div>
   );

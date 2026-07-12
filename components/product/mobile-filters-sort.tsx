@@ -45,6 +45,8 @@ export function MobileFiltersSort({ className }: MobileFiltersSortProps) {
     if (maxValue) params.set("max", maxValue);
     else params.delete("max");
 
+    params.delete("page");
+
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
     setOpen(false);

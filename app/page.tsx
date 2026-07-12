@@ -47,12 +47,13 @@ export default async function HomePage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-7xl space-y-12 px-4 md:mt-10 md:px-6">
-          {showcases.map(({ category, products }) => (
+          {showcases.map(({ category, products }, index) => (
             <CategoryShowcase
               key={category}
               category={category}
               products={products}
               seeMoreLabel="See more →"
+              priorityCount={index === 0 ? 4 : 0}
             />
           ))}
         </div>

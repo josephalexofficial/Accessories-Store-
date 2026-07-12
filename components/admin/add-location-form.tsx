@@ -46,11 +46,11 @@ export function AddLocationForm() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Add Location</CardTitle>
+      <CardHeader className="space-y-1 p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">Add Location</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
           <Input
             placeholder="Town / Area name"
             value={name}

@@ -1,121 +1,34 @@
-"use client";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowLeft } from "lucide-react";
+import { AdminLoginForm } from "@/components/admin/admin-login-form";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+export const metadata: Metadata = {
+  title: "Admin Login",
+  robots: { index: false, follow: false },
+};
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(false);
-
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    setLoading(false);
-
-    if (result?.error) {
-      setError(true);
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
-      return;
-    }
-
-    router.push("/admin/dashboard");
-  }
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4">
-      <div
-        className={cn(
-          "w-full max-w-md rounded-xl border border-border bg-white p-8 shadow-lg",
-          shake && "animate-shake"
-        )}
-      >
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand text-lg font-bold text-white">
-            W
-          </div>
-          <h1 className="text-xl font-bold tracking-widest text-brand">
-            WHIMSEY TECHNOLOGIES
-          </h1>
-          <p className="mt-2 text-sm text-muted">Admin Login</p>
+    <div className="relative flex min-h-dvh flex-col bg-gradient-to-b from-brand-tint/50 via-canvas to-surface">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6 sm:py-8">
+        <Link
+          href="/"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-canvas/90 px-3.5 py-2 text-sm font-semibold text-ink-muted shadow-sm backdrop-blur-sm transition-colors hover:border-brand/40 hover:text-brand"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Back to store
+        </Link>
+
+        <div className="flex flex-1 flex-col items-center justify-center py-10">
+          <AdminLoginForm />
+          <p className="mt-6 text-center text-xs text-ink-subtle">
+            Staff access only ·{" "}
+            <Link href="/" className="font-medium text-brand hover:underline">
+              Return home
+            </Link>
+          </p>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="mb-2 block text-xs uppercase tracking-wide text-muted">
-              Email
-            </label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-xs uppercase tracking-wide text-muted">
-              Password
-            </label>
-            <div className="relative">
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted transition-colors hover:text-brand"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Login"
-            )}
-          </Button>
-
-          {error && (
-            <p className="text-center text-sm text-red-500">
-              Invalid email or password
-            </p>
-          )}
-        </form>
       </div>
     </div>
   );

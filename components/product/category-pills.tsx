@@ -31,6 +31,7 @@ function categoryHref(
   } else {
     params.set("category", category);
   }
+  params.delete("page");
   const query = params.toString();
   return query ? `${basePath}?${query}` : basePath;
 }

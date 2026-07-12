@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { notifySuperAdminOfStaffAction } from "@/lib/admin-notifications";
 
 function bustProductCache() {
   revalidatePath("/");
   revalidatePath("/shop");
   revalidatePath("/deals");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/dashboard");
+  revalidateTag("products", "max");
+  revalidateTag("admin-products", "max");
+  revalidateTag("admin-dashboard", "max");
 }
 
 export async function GET() {
@@ -32,15 +38,22 @@ export async function POST(req: Request) {
       price: body.price,
       salePrice: body.salePrice,
       isSale: body.isSale ?? false,
+      stockStatus: body.stockStatus ?? "IN_STOCK",
       imageUrl: body.imageUrl,
       specType: body.specType ?? "KEY_VALUE",
       specifications: body.specifications ?? [],
     },
   });
 
-  revalidatePath("/");
-  revalidatePath("/shop");
-  revalidatePath("/deals");
+  bustProductCache();
+
+  await notifySuperAdminOfStaffAction({
+    type: "PRODUCT_CREATED",
+    title: "Product added",
+    message: `${product.title} was added to ${product.category}.`,
+    href: "/admin/products",
+    actorEmail: session.user?.email,
+  });
 
   return NextResponse.json(product, { status: 201 });
 }

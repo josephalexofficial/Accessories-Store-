@@ -10,15 +10,20 @@ export function AdminPageHeader({
   return (
     <div
       className={cn(
-        "admin-page-header sticky z-30 -mx-4 mb-6 flex flex-col gap-3",
-        "border-b border-border/80 bg-[#f8fafc]/95 px-4 py-4 backdrop-blur-sm",
-        "sm:flex-row sm:items-center sm:justify-between",
-        "md:-mx-8 md:px-8 md:py-5"
+        "admin-page-header sticky z-40 mb-4 flex flex-col gap-2.5",
+        // Opaque match to shell + mobile chrome so rows never ghost through
+        "border-b border-border bg-[#f8fafc] py-3 shadow-[0_1px_0_rgba(15,23,42,0.04)]",
+        // Sit directly under the fixed mobile top bar
+        "top-[var(--admin-mobile-chrome-height)]",
+        // Desktop: stick to the top of the content column
+        "md:top-0 md:z-30 md:-mx-8 md:mb-6 md:flex-row md:items-center md:justify-between md:px-8 md:py-5"
       )}
     >
-      <h1 className="text-xl font-bold text-foreground sm:text-2xl">{title}</h1>
+      <h1 className="text-lg font-bold leading-tight text-foreground sm:text-xl md:text-2xl">
+        {title}
+      </h1>
       {children ? (
-        <div className="flex w-full shrink-0 sm:w-auto [&_a]:block [&_a]:w-full sm:[&_a]:w-auto [&_button]:w-full sm:[&_button]:w-auto">
+        <div className="flex w-full shrink-0 justify-stretch sm:w-auto sm:justify-end [&_a]:inline-flex [&_a]:w-full [&_a]:items-center [&_a]:justify-center sm:[&_a]:w-auto [&_button]:inline-flex [&_button]:w-full [&_button]:items-center [&_button]:justify-center sm:[&_button]:w-auto">
           {children}
         </div>
       ) : null}
@@ -47,8 +52,10 @@ export function AdminPanel({
 
 export function AdminTable({ children }: { children: React.ReactNode }) {
   return (
-    <div className="-mx-px overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm">{children}</table>
+    <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+      <table className="w-full min-w-[36rem] text-sm md:min-w-[720px]">
+        {children}
+      </table>
     </div>
   );
 }
@@ -56,7 +63,7 @@ export function AdminTable({ children }: { children: React.ReactNode }) {
 export function AdminTableHead({ children }: { children: React.ReactNode }) {
   return (
     <thead className="border-b border-border bg-brand-tint/40">
-      <tr className="text-left text-[11px] uppercase tracking-wide text-ink-muted md:text-xs">
+      <tr className="text-left text-[10px] uppercase tracking-wide text-ink-muted sm:text-[11px] md:text-xs">
         {children}
       </tr>
     </thead>
@@ -91,7 +98,7 @@ export function AdminTableCell({
   colSpan?: number;
 }) {
   return (
-    <td className={cn("p-3 md:p-4", className)} colSpan={colSpan}>
+    <td className={cn("px-3 py-2.5 sm:p-3 md:p-4", className)} colSpan={colSpan}>
       {children}
     </td>
   );
@@ -104,12 +111,18 @@ export function AdminTableHeaderCell({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <th className={cn("p-3 font-semibold md:p-4", className)}>{children}</th>;
+  return (
+    <th className={cn("px-3 py-2.5 font-semibold sm:p-3 md:p-4", className)}>
+      {children}
+    </th>
+  );
 }
 
 export function AdminEmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <div className="p-8 text-center text-sm text-muted md:p-10">{children}</div>
+    <div className="px-4 py-10 text-center text-sm text-muted sm:px-5 md:p-10">
+      {children}
+    </div>
   );
 }
 

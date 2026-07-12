@@ -159,6 +159,14 @@ export async function POST(request: Request) {
       },
     });
 
+    const { notifyNewOrder } = await import("@/lib/admin-notifications");
+    await notifyNewOrder({
+      orderNumber: order.orderNumber,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      total: Number(order.total),
+    });
+
     return NextResponse.json(
       { orderNumber: order.orderNumber },
       { status: 201 }

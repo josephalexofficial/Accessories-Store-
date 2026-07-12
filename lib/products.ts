@@ -10,6 +10,7 @@ import {
   sortProducts,
 } from "./product-data";
 import { getEffectivePrice } from "./product-types";
+import { SHOP_PAGE_SIZE, paginateItems } from "./pagination";
 
 export type { Product, ProductFilters } from "./product-data";
 export { getEffectivePrice } from "./product-types";
@@ -113,6 +114,15 @@ const getCachedProductSlugs = unstable_cache(
 
 export async function getProducts(filters: ProductFilters = {}): Promise<Product[]> {
   return getCachedProducts(JSON.stringify(filters));
+}
+
+export async function getProductsPage(
+  filters: ProductFilters = {},
+  page = 1,
+  pageSize = SHOP_PAGE_SIZE
+) {
+  const all = await getProducts(filters);
+  return paginateItems(all, page, pageSize);
 }
 
 export async function findProductBySlug(slug: string): Promise<Product | null> {

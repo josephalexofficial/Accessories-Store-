@@ -44,19 +44,46 @@ export function AdminPasswordForm({ email }: { email: string }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>My Profile — Update Password</CardTitle>
+      <CardHeader className="space-y-1 p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">
+          My Profile — Update Password
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input placeholder="Current Password" type="password" value={current} onChange={(e) => setCurrent(e.target.value)} required />
-          <Input placeholder="New Password" type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} required />
-          <Input placeholder="Confirm New Password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
-          <Button type="submit" variant="outline" disabled={loading} className="w-full">
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
+          <Input
+            placeholder="Current Password"
+            type="password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="New Password"
+            type="password"
+            value={newPass}
+            onChange={(e) => setNewPass(e.target.value)}
+            required
+          />
+          <Input
+            placeholder="Confirm New Password"
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={loading}
+            className="w-full"
+          >
             Update Password
           </Button>
           {message && (
-            <p className={`text-sm ${success ? "text-green-400" : "text-red-400"}`}>
+            <p
+              className={`text-sm ${success ? "text-green-600" : "text-red-500"}`}
+            >
               {message}
             </p>
           )}

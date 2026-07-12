@@ -16,7 +16,7 @@ export type ProductSeed = {
 };
 
 const img = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=85`;
+  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=640&q=75`;
 
 export const PRODUCT_CATEGORIES = [
   "Laptops",

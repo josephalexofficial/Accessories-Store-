@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/utils";
+﻿import { formatPrice } from "@/lib/utils";
+import { getAdminCustomers } from "@/lib/admin-queries";
 import {
   AdminEmptyState,
   AdminPageHeader,
@@ -13,27 +13,7 @@ import {
 } from "@/components/admin/admin-ui";
 
 export default async function AdminCustomersPage() {
-  const [customers, orderStats] = await Promise.all([
-    prisma.customer.findMany({
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-      },
-    }),
-    prisma.order.groupBy({
-      by: ["customerId"],
-      where: {
-        paymentStatus: "PAID",
-        customerId: { not: null },
-      },
-      _sum: { total: true },
-      _count: { _all: true },
-    }),
-  ]);
+  const { customers, orderStats } = await getAdminCustomers();
 
   const statsByCustomer = new Map(
     orderStats.map((stat) => [
@@ -46,28 +26,26 @@ export default async function AdminCustomersPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AdminPageHeader title="Customer Management" />
 
-      <AdminPanel>
-        <AdminTable>
-          <AdminTableHead>
-            <AdminTableHeaderCell>Customer ID</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Name</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Email</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Phone</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Orders</AdminTableHeaderCell>
-            <AdminTableHeaderCell>Lifetime Spend</AdminTableHeaderCell>
-          </AdminTableHead>
-          <AdminTableBody>
-            {customers.length === 0 ? (
-              <tr>
-                <td colSpan={6}>
-                  <AdminEmptyState>No customers yet.</AdminEmptyState>
-                </td>
-              </tr>
-            ) : (
-              customers.map((customer) => {
+      {customers.length === 0 ? (
+        <AdminPanel>
+          <AdminEmptyState>No customers yet.</AdminEmptyState>
+        </AdminPanel>
+      ) : (
+        <AdminPanel>
+          <AdminTable>
+            <AdminTableHead>
+              <AdminTableHeaderCell>Customer ID</AdminTableHeaderCell>
+              <AdminTableHeaderCell>Name</AdminTableHeaderCell>
+              <AdminTableHeaderCell>Email</AdminTableHeaderCell>
+              <AdminTableHeaderCell>Phone</AdminTableHeaderCell>
+              <AdminTableHeaderCell>Orders</AdminTableHeaderCell>
+              <AdminTableHeaderCell>Lifetime Spend</AdminTableHeaderCell>
+            </AdminTableHead>
+            <AdminTableBody>
+              {customers.map((customer) => {
                 const stats = statsByCustomer.get(customer.id);
                 return (
                   <AdminTableRow key={customer.id}>
@@ -89,11 +67,11 @@ export default async function AdminCustomersPage() {
                     </AdminTableCell>
                   </AdminTableRow>
                 );
-              })
-            )}
-          </AdminTableBody>
-        </AdminTable>
-      </AdminPanel>
+              })}
+            </AdminTableBody>
+          </AdminTable>
+        </AdminPanel>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ export function SortBar({ className }: SortBarProps) {
     } else {
       params.set("sort", value);
     }
+    params.delete("page");
     const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname);
   }

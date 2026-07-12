@@ -1,4 +1,4 @@
-import { getAllDeliveryLocations } from "@/lib/delivery-locations";
+﻿import { getAllDeliveryLocations } from "@/lib/delivery-locations";
 import type { AdminDeliveryLocation } from "@/lib/delivery-location-types";
 import { AddLocationForm } from "@/components/admin/add-location-form";
 import { LocationTableRows } from "@/components/admin/location-table-rows";
@@ -17,37 +17,37 @@ export default async function AdminLocationsPage() {
   const isEmpty = locations.length === 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8">
       <AdminPageHeader title="Delivery Locations" />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <AdminPanel>
-            <AdminTable>
-              <AdminTableHead>
-                <AdminTableHeaderCell>Location</AdminTableHeaderCell>
-                <AdminTableHeaderCell>Amount (Ksh)</AdminTableHeaderCell>
-                <AdminTableHeaderCell>Status</AdminTableHeaderCell>
-                <AdminTableHeaderCell>Actions</AdminTableHeaderCell>
-              </AdminTableHead>
-              <AdminTableBody>
-                {isEmpty ? (
-                  <tr>
-                    <td colSpan={4}>
-                      <AdminEmptyState>
-                        No delivery locations yet. Add your first town.
-                      </AdminEmptyState>
-                    </td>
-                  </tr>
-                ) : (
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="order-2 lg:order-1 lg:col-span-2">
+          {isEmpty ? (
+            <AdminPanel>
+              <AdminEmptyState>
+                No delivery locations yet. Add your first town.
+              </AdminEmptyState>
+            </AdminPanel>
+          ) : (
+            <AdminPanel>
+              <AdminTable>
+                <AdminTableHead>
+                  <AdminTableHeaderCell>Location</AdminTableHeaderCell>
+                  <AdminTableHeaderCell>Amount (Ksh)</AdminTableHeaderCell>
+                  <AdminTableHeaderCell>Status</AdminTableHeaderCell>
+                  <AdminTableHeaderCell>Actions</AdminTableHeaderCell>
+                </AdminTableHead>
+                <AdminTableBody>
                   <LocationTableRows locations={locations} />
-                )}
-              </AdminTableBody>
-            </AdminTable>
-          </AdminPanel>
+                </AdminTableBody>
+              </AdminTable>
+            </AdminPanel>
+          )}
         </div>
 
-        <AddLocationForm />
+        <div className="order-1 lg:order-2">
+          <AddLocationForm />
+        </div>
       </div>
     </div>
   );

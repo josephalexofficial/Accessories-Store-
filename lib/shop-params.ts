@@ -1,4 +1,5 @@
 import type { SortValue } from "./constants";
+import { parsePageParam } from "./pagination";
 
 export type ShopQuery = {
   category: string;
@@ -6,6 +7,7 @@ export type ShopQuery = {
   q: string;
   minPrice: number | null;
   maxPrice: number | null;
+  page: number;
 };
 
 const SORT_VALUES: SortValue[] = [
@@ -33,6 +35,7 @@ export function parseShopQuery(params: {
   q?: string;
   min?: string;
   max?: string;
+  page?: string;
 }): ShopQuery {
   return {
     category: params.category?.trim() || "All Products",
@@ -40,5 +43,6 @@ export function parseShopQuery(params: {
     q: params.q?.trim() || "",
     minPrice: parsePriceParam(params.min),
     maxPrice: parsePriceParam(params.max),
+    page: parsePageParam(params.page),
   };
 }

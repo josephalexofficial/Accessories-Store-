@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { notifySuperAdminOfStaffAction } from "@/lib/admin-notifications";
 
 function bustLocationCache() {
   revalidateTag("delivery-locations", "max");
@@ -64,6 +65,14 @@ export async function POST(request: Request) {
   });
 
   bustLocationCache();
+
+  await notifySuperAdminOfStaffAction({
+    type: "LOCATION_CREATED",
+    title: "Delivery location added",
+    message: `${location.name} was added (Ksh ${Number(location.fee).toLocaleString()}).`,
+    href: "/admin/locations",
+    actorEmail: session.user?.email,
+  });
 
   return NextResponse.json(
     {

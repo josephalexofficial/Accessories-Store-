@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/product/product-image";
+import { PRODUCT_THUMB_SIZES } from "@/lib/product-image";
 
 export function CartContent() {
   const items = useCart((s) => s.items);
@@ -49,12 +50,11 @@ export function CartContent() {
             <CardContent className="flex gap-4 p-4">
               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-surface">
                 {item.imageUrl ? (
-                  <Image
+                  <ProductImage
                     src={item.imageUrl}
                     alt={item.title}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
+                    sizes={PRODUCT_THUMB_SIZES}
+                    quality={60}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-[10px] text-muted">
