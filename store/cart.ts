@@ -15,6 +15,8 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  hasHydrated: boolean;
+  setHasHydrated: (value: boolean) => void;
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -27,6 +29,8 @@ export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      hasHydrated: false,
+      setHasHydrated: (value) => set({ hasHydrated: value }),
       addItem: (item) => {
         const existing = get().items.find((i) => i.id === item.id);
         if (existing) {
@@ -61,6 +65,11 @@ export const useCart = create<CartStore>()(
           0
         ),
     }),
-    { name: "whimsey-cart" }
+    {
+      name: "whimsey-cart",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    }
   )
 );

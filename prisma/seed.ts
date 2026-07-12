@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { PRODUCT_SEED } from "./product-seed-data";
+import { DELIVERY_LOCATION_SEED } from "./delivery-location-seed-data";
 
 const prisma = new PrismaClient();
 
@@ -74,9 +75,41 @@ async function seedProducts() {
   );
 }
 
+async function seedDeliveryLocations() {
+  let created = 0;
+  let updated = 0;
+
+  for (const location of DELIVERY_LOCATION_SEED) {
+    const existing = await prisma.deliveryLocation.findUnique({
+      where: { name: location.name },
+    });
+
+    await prisma.deliveryLocation.upsert({
+      where: { name: location.name },
+      create: {
+        name: location.name,
+        fee: location.fee,
+        isActive: true,
+      },
+      update: {
+        fee: location.fee,
+        isActive: true,
+      },
+    });
+
+    if (existing) updated++;
+    else created++;
+  }
+
+  console.log(
+    `✅ Delivery locations seeded: ${DELIVERY_LOCATION_SEED.length} total (${created} new, ${updated} updated).`
+  );
+}
+
 async function main() {
   await seedAdmin();
   await seedProducts();
+  await seedDeliveryLocations();
 }
 
 main()

@@ -11,11 +11,20 @@ import { cn } from "@/lib/utils";
 
 export function CartContent() {
   const items = useCart((s) => s.items);
+  const hasHydrated = useCart((s) => s.hasHydrated);
   const updateQuantity = useCart((s) => s.updateQuantity);
   const removeItem = useCart((s) => s.removeItem);
   const subtotal = useCart((s) =>
     s.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   );
+
+  if (!hasHydrated) {
+    return (
+      <div className="rounded-xl border border-border py-16 text-center text-sm text-muted">
+        Loading cart…
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

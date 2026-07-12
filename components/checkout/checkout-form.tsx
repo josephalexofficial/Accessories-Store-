@@ -6,21 +6,45 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { PICKUP_ADDRESS, PICKUP_HOURS } from "@/lib/constants";
+import type { DeliveryLocationOption } from "@/lib/delivery-location-types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DeliveryLocationSelect } from "@/components/checkout/delivery-location-select";
 import { cn } from "@/lib/utils";
 
-export function CheckoutForm() {
+interface CheckoutFormProps {
+  locations: DeliveryLocationOption[];
+}
+
+export function CheckoutForm({ locations }: CheckoutFormProps) {
   const router = useRouter();
   const items = useCart((s) => s.items);
   const subtotal = useCart((s) =>
     s.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   );
   const clearCart = useCart((s) => s.clearCart);
+  const hasHydrated = useCart((s) => s.hasHydrated);
 
-  const [fulfillment, setFulfillment] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
+  const [fulfillment, setFulfillment] = useState<"DELIVERY" | "PICKUP">(
+    "DELIVERY"
+  );
+  const [selectedLocation, setSelectedLocation] =
+    useState<DeliveryLocationOption | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const shipping =
+    fulfillment === "DELIVERY" && selectedLocation ? selectedLocation.fee : 0;
+  const total = subtotal + shipping;
+
+  if (!hasHydrated) {
+    return (
+      <div className="rounded-xl border border-border py-16 text-center text-sm text-muted">
+        Loading checkout…
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -35,6 +59,13 @@ export function CheckoutForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
+
+    if (fulfillment === "DELIVERY" && !selectedLocation) {
+      setError("Please select a delivery location.");
+      return;
+    }
+
     setSubmitting(true);
 
     const form = new FormData(e.currentTarget);
@@ -47,6 +78,8 @@ export function CheckoutForm() {
         body: JSON.stringify({
           ...data,
           fulfillmentType: fulfillment,
+          deliveryLocationId:
+            fulfillment === "DELIVERY" ? selectedLocation?.id : undefined,
           items: items.map((i) => ({
             productId: i.id,
             quantity: i.quantity,
@@ -56,15 +89,17 @@ export function CheckoutForm() {
         }),
       });
 
-      if (res.ok) {
-        const { orderNumber } = await res.json();
-        clearCart();
-        router.push(`/track-order?order=${orderNumber}`);
+      const payload = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setError(payload.error ?? "Could not place order. Please try again.");
+        return;
       }
-    } catch {
-      // Order API may not exist yet — show confirmation UX
+
       clearCart();
-      router.push("/track-order");
+      router.push(`/track-order?order=${payload.orderNumber}`);
+    } catch {
+      setError("Could not place order. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -131,7 +166,8 @@ export function CheckoutForm() {
                   <span className="text-sm font-medium">Delivery</span>
                 </div>
                 <p className="mt-2 text-xs text-muted">
-                  We deliver within Nairobi and surrounding areas.
+                  We deliver across Kenya. Select your town to see the shipping
+                  fee.
                 </p>
               </label>
 
@@ -149,7 +185,10 @@ export function CheckoutForm() {
                     name="fulfillmentType"
                     value="PICKUP"
                     checked={fulfillment === "PICKUP"}
-                    onChange={() => setFulfillment("PICKUP")}
+                    onChange={() => {
+                      setFulfillment("PICKUP");
+                      setSelectedLocation(null);
+                    }}
                     className="accent-brand"
                   />
                   <span className="text-sm font-medium">Pickup</span>
@@ -159,12 +198,12 @@ export function CheckoutForm() {
             </div>
 
             {fulfillment === "DELIVERY" && (
-              <div className="space-y-1.5">
-                <label htmlFor="deliveryTown" className="text-sm text-muted">
-                  Delivery Town / Area
-                </label>
-                <Input id="deliveryTown" name="deliveryTown" required />
-              </div>
+              <DeliveryLocationSelect
+                locations={locations}
+                value={selectedLocation}
+                onChange={setSelectedLocation}
+                required
+              />
             )}
 
             {fulfillment === "PICKUP" && (
@@ -195,10 +234,46 @@ export function CheckoutForm() {
                 </li>
               ))}
             </ul>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted">Subtotal</span>
-              <span className="font-semibold">{formatPrice(subtotal)}</span>
+
+            <div className="space-y-2 border-b border-border pb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted">Subtotal</span>
+                <span className="font-semibold">{formatPrice(subtotal)}</span>
+              </div>
+
+              {fulfillment === "DELIVERY" && selectedLocation ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted">
+                    Shipping ({selectedLocation.name})
+                  </span>
+                  <span className="font-semibold">
+                    {formatPrice(selectedLocation.fee)}
+                  </span>
+                </div>
+              ) : fulfillment === "PICKUP" ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted">Shipping</span>
+                  <span className="font-semibold">{formatPrice(0)}</span>
+                </div>
+              ) : (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted">Shipping</span>
+                  <span className="text-xs text-ink-subtle">
+                    Select a town
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-base font-bold">
+                <span>Total</span>
+                <span className="text-brand">{formatPrice(total)}</span>
+              </div>
             </div>
+
+            {error && (
+              <p className="text-center text-sm text-red-500">{error}</p>
+            )}
+
             <Button
               type="submit"
               className="w-full"

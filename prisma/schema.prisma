@@ -117,3 +117,12 @@ model WhatsAppClick {
   page      String?
   createdAt DateTime @default(now())
 }
+
+model DeliveryLocation {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  fee       Decimal  @db.Decimal(12, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

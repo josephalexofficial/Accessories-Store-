@@ -20,9 +20,12 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const totalItems = useCart((s) => s.totalItems());
+  const hasHydrated = useCart((s) => s.hasHydrated);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+
+  const cartCount = hasHydrated ? totalItems : 0;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -102,9 +105,9 @@ export function Navbar() {
           <Link href="/cart" className="relative">
             <Button variant="ghost" size="icon" className="text-ink" aria-label="Shopping cart">
               <ShoppingCart className="h-5 w-5" />
-              {totalItems > 0 && (
+              {cartCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
-                  {totalItems > 99 ? "99+" : totalItems}
+                  {cartCount > 99 ? "99+" : cartCount}
                 </span>
               )}
             </Button>

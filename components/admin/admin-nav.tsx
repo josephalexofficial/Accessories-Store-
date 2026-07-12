@@ -9,6 +9,7 @@ import {
   MessageCircle,
   Users,
   Shield,
+  MapPin,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const NAV: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/locations", label: "Locations", icon: MapPin },
   { href: "/admin/whatsapp", label: "WhatsApp Log", icon: MessageCircle },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/admins", label: "Admins", icon: Shield },

@@ -14,7 +14,7 @@ export function HeroSection() {
         <div className="grid items-center gap-6 md:gap-8 lg:grid-cols-2 lg:gap-12">
           <div className="order-1 flex flex-col justify-center">
             <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-brand md:text-sm">
-              Nairobi&apos;s Premium Tech Store
+              Whimsey Premium Tech Store
             </p>
             <h1 className="mt-2 text-[1.75rem] font-black leading-[1.08] tracking-tight text-ink sm:text-4xl md:text-[2.75rem] lg:text-5xl">
               Tech That Elevates

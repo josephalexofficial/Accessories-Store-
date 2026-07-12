@@ -31,22 +31,30 @@ export default async function HomePage() {
           <h2 className="text-xl font-black tracking-tight text-brand md:text-2xl">
             Our Products
           </h2>
-          <div className="mt-2.5 border-t border-border-brand/40 pt-3 md:mt-3 md:pt-4">
+        </div>
+
+        {/* Sticky under main navbar on mobile and desktop */}
+        <div className="sticky top-16 z-40 mt-2.5 border-y border-border-brand/40 bg-canvas/95 backdrop-blur-md md:mt-3">
+          <div className="mx-auto max-w-7xl px-4 py-3 md:px-6 md:py-3.5">
             <Suspense fallback={null}>
-              <CategoryPills activeCategory="All Products" showScrollHint />
+              <CategoryPills
+                activeCategory="All Products"
+                basePath="/shop"
+                showScrollHint
+              />
             </Suspense>
           </div>
+        </div>
 
-          <div className="mt-8 space-y-12 md:mt-10">
-            {showcases.map(({ category, products }) => (
-              <CategoryShowcase
-                key={category}
-                category={category}
-                products={products}
-                seeMoreLabel="See more →"
-              />
-            ))}
-          </div>
+        <div className="mx-auto mt-8 max-w-7xl space-y-12 px-4 md:mt-10 md:px-6">
+          {showcases.map(({ category, products }) => (
+            <CategoryShowcase
+              key={category}
+              category={category}
+              products={products}
+              seeMoreLabel="See more →"
+            />
+          ))}
         </div>
       </section>
     </StoreLayout>

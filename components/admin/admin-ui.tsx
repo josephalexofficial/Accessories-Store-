@@ -84,11 +84,17 @@ export function AdminTableRow({
 export function AdminTableCell({
   children,
   className,
+  colSpan,
 }: {
   children: React.ReactNode;
   className?: string;
+  colSpan?: number;
 }) {
-  return <td className={cn("p-3 md:p-4", className)}>{children}</td>;
+  return (
+    <td className={cn("p-3 md:p-4", className)} colSpan={colSpan}>
+      {children}
+    </td>
+  );
 }
 
 export function AdminTableHeaderCell({
