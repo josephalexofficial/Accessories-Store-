@@ -2,7 +2,12 @@ import { SHOP_CATEGORIES } from "./constants";
 
 type ProductLike = { category: string; title: string };
 
-export function groupByCategory<T extends ProductLike>(items: T[]) {
+type CategoryGroup<T> = {
+  category: string;
+  items: T[];
+};
+
+export function groupByCategory<T extends ProductLike>(items: T[]): CategoryGroup<T>[] {
   const map = new Map<string, T[]>();
 
   for (const item of items) {
@@ -14,13 +19,15 @@ export function groupByCategory<T extends ProductLike>(items: T[]) {
   const sortItems = (categoryItems: T[]) =>
     [...categoryItems].sort((a, b) => a.title.localeCompare(b.title));
 
-  const grouped = SHOP_CATEGORIES.map((category) => ({
+  const knownCategories = new Set<string>(SHOP_CATEGORIES);
+
+  const grouped: CategoryGroup<T>[] = SHOP_CATEGORIES.map((category) => ({
     category,
     items: sortItems(map.get(category) ?? []),
   })).filter((group) => group.items.length > 0);
 
   for (const [category, categoryItems] of map) {
-    if (!SHOP_CATEGORIES.includes(category as (typeof SHOP_CATEGORIES)[number])) {
+    if (!knownCategories.has(category)) {
       grouped.push({
         category,
         items: sortItems(categoryItems),
