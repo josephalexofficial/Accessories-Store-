@@ -14,7 +14,10 @@ function getPrismaClient() {
   const existing = globalForPrisma.prisma;
 
   // After schema changes, an old hot-reloaded client may be missing new models.
-  if (existing && typeof (existing as { deliveryLocation?: unknown }).deliveryLocation?.findMany === "function") {
+  const deliveryLocation = (
+    existing as { deliveryLocation?: { findMany?: unknown } } | undefined
+  )?.deliveryLocation;
+  if (existing && typeof deliveryLocation?.findMany === "function") {
     return existing;
   }
 

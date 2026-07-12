@@ -11,15 +11,13 @@ import {
   AdminTableCell,
   AdminTableRow,
 } from "@/components/admin/admin-ui";
+import type { AdminDeliveryLocation } from "@/lib/delivery-location-types";
 
-type LocationRow = {
-  id: string;
-  name: string;
-  fee: number;
-  isActive: boolean;
-};
-
-export function LocationTableRow({ location }: { location: LocationRow }) {
+export function LocationTableRow({
+  location,
+}: {
+  location: AdminDeliveryLocation;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(location.name);

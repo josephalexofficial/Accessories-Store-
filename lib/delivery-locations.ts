@@ -1,9 +1,15 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
-import type { DeliveryLocationOption } from "./delivery-location-types";
+import type {
+  AdminDeliveryLocation,
+  DeliveryLocationOption,
+} from "./delivery-location-types";
 
-export type { DeliveryLocationOption } from "./delivery-location-types";
+export type {
+  AdminDeliveryLocation,
+  DeliveryLocationOption,
+} from "./delivery-location-types";
 
 function serializeLocation(location: {
   id: string;
@@ -46,14 +52,25 @@ export async function findDeliveryLocationById(
   return location ? serializeLocation(location) : null;
 }
 
-export async function getAllDeliveryLocations() {
+export async function getAllDeliveryLocations(): Promise<
+  AdminDeliveryLocation[]
+> {
   const locations = await prisma.deliveryLocation.findMany({
     orderBy: { name: "asc" },
   });
-  return locations.map((location) => ({
-    ...serializeLocation(location),
-    isActive: location.isActive,
-    createdAt: location.createdAt,
-    updatedAt: location.updatedAt,
-  }));
+  return locations.map(
+    (location: {
+      id: string;
+      name: string;
+      fee: { toString(): string } | number;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }): AdminDeliveryLocation => ({
+      ...serializeLocation(location),
+      isActive: location.isActive,
+      createdAt: location.createdAt,
+      updatedAt: location.updatedAt,
+    })
+  );
 }
