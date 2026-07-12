@@ -1,7 +1,7 @@
 import { getAllDeliveryLocations } from "@/lib/delivery-locations";
 import type { AdminDeliveryLocation } from "@/lib/delivery-location-types";
 import { AddLocationForm } from "@/components/admin/add-location-form";
-import { LocationTableRow } from "@/components/admin/location-table-row";
+import { LocationTableRows } from "@/components/admin/location-table-rows";
 import {
   AdminEmptyState,
   AdminPageHeader,
@@ -14,6 +14,7 @@ import {
 
 export default async function AdminLocationsPage() {
   const locations: AdminDeliveryLocation[] = await getAllDeliveryLocations();
+  const isEmpty = locations.length === 0;
 
   return (
     <div className="space-y-8">
@@ -30,7 +31,7 @@ export default async function AdminLocationsPage() {
                 <AdminTableHeaderCell>Actions</AdminTableHeaderCell>
               </AdminTableHead>
               <AdminTableBody>
-                {locations.length === 0 ? (
+                {isEmpty ? (
                   <tr>
                     <td colSpan={4}>
                       <AdminEmptyState>
@@ -39,9 +40,7 @@ export default async function AdminLocationsPage() {
                     </td>
                   </tr>
                 ) : (
-                  locations.map((location: AdminDeliveryLocation) => (
-                    <LocationTableRow key={location.id} location={location} />
-                  ))
+                  <LocationTableRows locations={locations} />
                 )}
               </AdminTableBody>
             </AdminTable>
