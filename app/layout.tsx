@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   },
   description:
     "Premium hardware ecosystems engineered for elite digital setups.",
+  icons: {
+    icon: "/icon",
+    apple: "/apple-icon",
+  },
 };
 
 export default function RootLayout({

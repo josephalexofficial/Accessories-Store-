@@ -8,7 +8,8 @@ import {
   buildWhatsAppUrl,
 } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, MessageCircle } from "lucide-react";
+import { WhatsAppIcon } from "@/components/shared/brand-icons";
+import { ShoppingCart } from "lucide-react";
 
 interface ProductActionsProps {
   product: Product;
@@ -81,8 +82,8 @@ export function ProductActions({ product }: ProductActionsProps) {
         className="flex-1"
         onClick={handleWhatsApp}
       >
-        <MessageCircle className="h-4 w-4" />
-        WhatsApp
+        <WhatsAppIcon className="h-4 w-4 text-white" />
+        Inquire on WhatsApp
       </Button>
       <Button
         size="lg"

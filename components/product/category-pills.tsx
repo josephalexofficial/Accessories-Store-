@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -10,21 +13,50 @@ interface CategoryPillsProps {
   showScrollHint?: boolean;
 }
 
+function categoryHref(
+  basePath: string,
+  category: string,
+  searchParams: URLSearchParams,
+  preserveParams: boolean
+) {
+  if (!preserveParams) {
+    return category === "All Products"
+      ? basePath
+      : `${basePath}?category=${encodeURIComponent(category)}`;
+  }
+
+  const params = new URLSearchParams(searchParams.toString());
+  if (category === "All Products") {
+    params.delete("category");
+  } else {
+    params.set("category", category);
+  }
+  const query = params.toString();
+  return query ? `${basePath}?${query}` : basePath;
+}
+
 export function CategoryPills({
   activeCategory = "All Products",
-  basePath = "/shop",
+  basePath,
   className,
   showScrollHint = false,
 }: CategoryPillsProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const path = basePath ?? pathname;
+  const preserveParams = path === "/shop" || path === "/deals";
+
   return (
     <div className={className}>
       <div className="scrollbar-none flex gap-2 overflow-x-auto pb-0.5">
         {CATEGORIES.map((category) => {
           const isActive = activeCategory === category;
-          const href =
-            category === "All Products"
-              ? basePath
-              : `${basePath}?category=${encodeURIComponent(category)}`;
+          const href = categoryHref(
+            path,
+            category,
+            searchParams,
+            preserveParams
+          );
 
           return (
             <Link

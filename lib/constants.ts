@@ -74,10 +74,10 @@ export const SOCIAL_LINKS = [
 ] as const;
 
 export const SORT_OPTIONS = [
+  { value: "popularity", label: "Most Popular" },
   { value: "newest", label: "Newest" },
   { value: "price-asc", label: "Price: Low to High" },
   { value: "price-desc", label: "Price: High to Low" },
-  { value: "popularity", label: "Most Popular" },
 ] as const;
 
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"];

@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import type { Prisma, Product as PrismaProduct } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import type { SortValue } from "./constants";
 import {
@@ -9,14 +9,43 @@ import {
   serializeProduct,
   sortProducts,
 } from "./product-data";
+import { getEffectivePrice } from "./product-types";
 
 export type { Product, ProductFilters } from "./product-data";
 export { getEffectivePrice } from "./product-types";
 
 const CACHE_SECONDS = 120;
 
+function applyPriceFilter(
+  products: Product[],
+  minPrice?: number | null,
+  maxPrice?: number | null
+): Product[] {
+  let min = minPrice ?? null;
+  let max = maxPrice ?? null;
+  if (min != null && max != null && min > max) {
+    [min, max] = [max, min];
+  }
+  if (min == null && max == null) return products;
+
+  return products.filter((product) => {
+    const price = getEffectivePrice(product);
+    if (min != null && price < min) return false;
+    if (max != null && price > max) return false;
+    return true;
+  });
+}
+
 async function fetchProductsFromDb(filters: ProductFilters): Promise<Product[]> {
-  const { category, sort = "newest", isSale, limit } = filters;
+  const {
+    category,
+    sort = "popularity",
+    isSale,
+    limit,
+    q,
+    minPrice,
+    maxPrice,
+  } = filters;
 
   const where: Prisma.ProductWhereInput = {};
 
@@ -26,6 +55,15 @@ async function fetchProductsFromDb(filters: ProductFilters): Promise<Product[]> 
 
   if (isSale !== undefined) {
     where.isSale = isSale;
+  }
+
+  const term = q?.trim();
+  if (term) {
+    where.OR = [
+      { title: { contains: term, mode: "insensitive" } },
+      { brand: { contains: term, mode: "insensitive" } },
+      { category: { contains: term, mode: "insensitive" } },
+    ];
   }
 
   const orderBy: Prisma.ProductOrderByWithRelationInput =
@@ -39,9 +77,10 @@ async function fetchProductsFromDb(filters: ProductFilters): Promise<Product[]> 
     ...(limit ? { take: limit } : {}),
   });
 
-  const serialized = products.map(serializeProduct);
+  let serialized = products.map(serializeProduct);
+  serialized = applyPriceFilter(serialized, minPrice, maxPrice);
 
-  if (sort === "price-asc" || sort === "price-desc") {
+  if (sort === "price-asc" || sort === "price-desc" || sort === "newest") {
     return sortProducts(serialized, sort);
   }
 

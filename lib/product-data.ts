@@ -9,6 +9,10 @@ export type ProductFilters = {
   sort?: SortValue;
   isSale?: boolean;
   limit?: number;
+  /** Free-text search across title, brand, and category */
+  q?: string;
+  minPrice?: number | null;
+  maxPrice?: number | null;
 };
 
 function decimalToNumber(value: Prisma.Decimal | null | undefined): number | null {
