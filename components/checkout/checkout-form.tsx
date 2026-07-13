@@ -70,8 +70,10 @@ export function CheckoutForm({ locations }: CheckoutFormProps) {
 
     const form = new FormData(e.currentTarget);
     const data = Object.fromEntries(form.entries());
+    const email = String(data.email ?? "").trim();
 
     try {
+      // 1) Create the order (payment still PENDING)
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -96,8 +98,34 @@ export function CheckoutForm({ locations }: CheckoutFormProps) {
         return;
       }
 
+      const orderNumber = String(payload.orderNumber ?? "");
+      if (!orderNumber) {
+        setError("Order created but missing order number. Please contact support.");
+        return;
+      }
+
+      // 2) Initialize Paystack (test keys now; swap to sk_live_ / pk_live_ later)
+      const payRes = await fetch("/api/paystack/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderNumber, email }),
+      });
+      const payPayload = await payRes.json().catch(() => ({}));
+
+      if (!payRes.ok || !payPayload.authorizationUrl) {
+        setError(
+          payPayload.error ??
+            "Order was created, but payment could not start. Track your order or try paying again."
+        );
+        // Order exists — send them to track so they have the ID
+        clearCart();
+        router.push(`/track-order?order=${encodeURIComponent(orderNumber)}`);
+        return;
+      }
+
+      // Cart is covered by the pending order; clear before leaving for Paystack
       clearCart();
-      router.push(`/track-order?order=${payload.orderNumber}`);
+      window.location.href = payPayload.authorizationUrl as string;
     } catch {
       setError("Could not place order. Please try again.");
     } finally {
@@ -280,8 +308,11 @@ export function CheckoutForm({ locations }: CheckoutFormProps) {
               size="lg"
               disabled={submitting}
             >
-              {submitting ? "Placing Order…" : "Place Order"}
+              {submitting ? "Redirecting to Paystack…" : "Place Order & Pay"}
             </Button>
+            <p className="text-center text-[11px] text-ink-subtle">
+              You’ll complete payment securely on Paystack.
+            </p>
           </CardContent>
         </Card>
       </div>

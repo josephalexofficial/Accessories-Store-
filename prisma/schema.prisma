@@ -78,9 +78,14 @@ model Order {
   orderStatus     OrderStatus     @default(PENDING)
   statusNote      String?
   statusUpdatedAt DateTime?
+  // Paystack transaction reference (unique per payment attempt — enforced in app)
+  paystackReference String?
+  paidAt          DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   items           OrderItem[]
+
+  @@index([paystackReference])
 }
 
 enum FulfillmentType {

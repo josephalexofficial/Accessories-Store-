@@ -82,6 +82,20 @@ DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DB?schema=public"
 AUTH_SECRET="generate-a-long-random-secret"
 # Local only — do NOT set this to localhost on Vercel
 AUTH_URL="http://localhost:3000"
+
+# ─── Paystack (Test now → Live later) ───────────────────────────────────────
+# TEST (safe for development — no real till settlements):
+PAYSTACK_SECRET_KEY="sk_test_xxxxxxxx"
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY="pk_test_xxxxxxxx"
+#
+# LIVE (after Paystack KYC / Live mode is approved):
+#   1. Switch Paystack dashboard to Live
+#   2. Replace the two keys above with sk_live_... and pk_live_...
+#   3. Set the same on Vercel → Environment Variables → Production
+#   4. Webhook URL (Test + Live):
+#        https://whimsey-accessories-store.vercel.app/api/paystack/webhook
+#   5. Redeploy
+# ────────────────────────────────────────────────────────────────────────────
 ```
 
 > Use `DIRECT_URL` for Prisma migrations when your primary `DATABASE_URL` goes through a pooler.
@@ -146,6 +160,16 @@ Admin and Track Order share the same lifecycle:
 | `CANCELLED` | Cancelled |
 
 Payment is tracked separately (`PENDING` / `PAID` / `FAILED`).
+
+### Paystack checkout
+
+1. Customer clicks **Place Order & Pay**
+2. Order is created (`paymentStatus: PENDING`)
+3. Customer pays on Paystack
+4. Callback + webhook verify the charge → `PAID`
+
+Local callback: `http://localhost:3000/checkout/callback`  
+Production webhook: `https://whimsey-accessories-store.vercel.app/api/paystack/webhook`
 
 ---
 
