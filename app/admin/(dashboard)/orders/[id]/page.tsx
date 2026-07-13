@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getAdminOrderById } from "@/lib/admin-queries";
+import { toIsoString, toIsoStringRequired } from "@/lib/date";
 import { AdminOrderDetail } from "@/components/admin/admin-order-detail";
 
 export default async function AdminOrderDetailPage({
@@ -17,8 +18,8 @@ export default async function AdminOrderDetailPage({
       order={{
         id: order.id,
         orderNumber: order.orderNumber,
-        createdAt: order.createdAt.toISOString(),
-        updatedAt: order.updatedAt.toISOString(),
+        createdAt: toIsoStringRequired(order.createdAt),
+        updatedAt: toIsoStringRequired(order.updatedAt),
         firstName: order.firstName,
         lastName: order.lastName,
         email: order.email,
@@ -31,7 +32,7 @@ export default async function AdminOrderDetailPage({
         paymentStatus: order.paymentStatus,
         orderStatus: order.orderStatus,
         statusNote: order.statusNote,
-        statusUpdatedAt: order.statusUpdatedAt?.toISOString() ?? null,
+        statusUpdatedAt: toIsoString(order.statusUpdatedAt),
         items: order.items.map((item) => ({
           id: item.id,
           title: item.title,

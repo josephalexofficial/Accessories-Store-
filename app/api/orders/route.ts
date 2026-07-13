@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { findDeliveryLocationById } from "@/lib/delivery-locations";
 
@@ -166,6 +167,10 @@ export async function POST(request: Request) {
       lastName: order.lastName,
       total: Number(order.total),
     });
+
+    revalidateTag("admin-orders", "max");
+    revalidateTag("admin-dashboard", "max");
+    revalidateTag("admin-customers", "max");
 
     return NextResponse.json(
       { orderNumber: order.orderNumber },

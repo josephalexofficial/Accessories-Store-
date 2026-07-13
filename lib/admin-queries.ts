@@ -83,8 +83,8 @@ export const getAdminProductById = cache(async (id: string) =>
 );
 
 export const getAdminOrders = unstable_cache(
-  async () =>
-    prisma.order.findMany({
+  async () => {
+    const orders = await prisma.order.findMany({
       orderBy: { createdAt: "desc" },
       take: 150,
       select: {
@@ -103,7 +103,27 @@ export const getAdminOrders = unstable_cache(
         statusUpdatedAt: true,
         _count: { select: { items: true } },
       },
-    }),
+    });
+
+    // Serialize before caching — unstable_cache JSON would turn Date into string anyway
+    // and callers calling `.toISOString()` would crash on cache hits.
+    return orders.map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      createdAt: order.createdAt.toISOString(),
+      firstName: order.firstName,
+      lastName: order.lastName,
+      email: order.email,
+      phone: order.phone,
+      fulfillmentType: order.fulfillmentType,
+      deliveryTown: order.deliveryTown,
+      total: Number(order.total),
+      paymentStatus: order.paymentStatus,
+      orderStatus: order.orderStatus,
+      statusUpdatedAt: order.statusUpdatedAt?.toISOString() ?? null,
+      itemCount: order._count.items,
+    }));
+  },
   ["admin-orders"],
   { revalidate: 20, tags: ["admin-orders"] }
 );
