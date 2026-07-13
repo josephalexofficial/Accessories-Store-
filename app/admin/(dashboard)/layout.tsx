@@ -1,10 +1,12 @@
+import { redirect } from "next/navigation";
 import { signOut } from "@/auth";
 import { getAdminSession } from "@/lib/admin-queries";
 import { AdminMobileChrome, AdminSidebar } from "@/components/admin/admin-nav";
 
 async function logout() {
   "use server";
-  await signOut({ redirectTo: "/admin" });
+  await signOut({ redirect: false });
+  redirect("/admin");
 }
 
 export default async function AdminLayout({

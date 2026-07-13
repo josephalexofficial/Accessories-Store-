@@ -80,10 +80,25 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB?schema=public"
 DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DB?schema=public"
 
 AUTH_SECRET="generate-a-long-random-secret"
-# Auth / provider settings as configured in your auth.ts setup
+# Local only — do NOT set this to localhost on Vercel
+AUTH_URL="http://localhost:3000"
 ```
 
 > Use `DIRECT_URL` for Prisma migrations when your primary `DATABASE_URL` goes through a pooler.
+
+### Vercel / production auth (important)
+
+If `AUTH_URL` or `NEXTAUTH_URL` is set to `http://localhost:3000` in Vercel, admin login and protected routes will redirect users to localhost.
+
+On Vercel → Project → Settings → Environment Variables:
+
+| Variable | Production value |
+| --- | --- |
+| `AUTH_SECRET` | A long random secret (required) |
+| `AUTH_URL` | `https://whimsey-accessories-store.vercel.app` **or remove it** |
+| `NEXTAUTH_URL` | Remove if present (legacy); do not leave as localhost |
+
+`trustHost` is enabled in code, so omitting `AUTH_URL` on Vercel is fine — Auth.js will use the request host. After changing env vars, redeploy.
 
 ### 3. Database
 

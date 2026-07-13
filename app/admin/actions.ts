@@ -2,6 +2,7 @@
 
 import { AuthError } from "@auth/core/errors";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 
 export type AdminLoginState = {
@@ -22,13 +23,20 @@ export async function adminLogin(
   }
 
   try {
-    await signIn("credentials", {
+    // Avoid Auth.js absolute redirects (they can follow a localhost AUTH_URL).
+    // Use Next's relative redirect so we stay on the current host (Vercel or local).
+    const result = await signIn("credentials", {
       email,
       password,
-      redirectTo: "/admin/dashboard",
+      redirect: false,
     });
+
+    if (result?.error) {
+      return { error: "Invalid email or password" };
+    }
+
+    redirect("/admin/dashboard");
   } catch (error) {
-    // Successful sign-in throws a redirect — rethrow so Next can navigate.
     if (isRedirectError(error)) throw error;
 
     if (error instanceof AuthError) {
@@ -37,6 +45,4 @@ export async function adminLogin(
 
     return { error: "Something went wrong. Please try again." };
   }
-
-  return { error: null };
 }

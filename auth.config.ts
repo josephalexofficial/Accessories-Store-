@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { resolveAuthRedirect } from "@/lib/auth-url";
 
 /**
  * Edge-safe auth config for middleware. Keep this file free of Prisma/bcrypt imports.
@@ -11,6 +12,7 @@ export const authConfig = {
     strategy: "jwt",
   },
   providers: [],
+  trustHost: true,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -26,6 +28,12 @@ export const authConfig = {
       }
       return session;
     },
+    /**
+     * Keep post-login redirects on the real deployment host.
+     * Stops AUTH_URL=localhost (common Vercel misconfig) from hijacking users.
+     */
+    async redirect({ url, baseUrl }) {
+      return resolveAuthRedirect(url, baseUrl);
+    },
   },
-  trustHost: true,
 } satisfies NextAuthConfig;
